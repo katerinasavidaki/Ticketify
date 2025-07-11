@@ -15,7 +15,6 @@ import java.util.Set;
 @Builder
 @Getter
 @Setter
-@ToString(exclude = "events")
 public class Region {
 
     @Id
