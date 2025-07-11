@@ -9,14 +9,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
-    List<Ticket> findByUser(User user);
-    List<Ticket> findByEvent(Event event);
+    List<Ticket> findByUserId(Long userId);
+    List<Ticket> findByEventId(Long eventId);
     List<Ticket> findByStatus(TicketStatus status);
-    List<Ticket> findByIsCancelled(Boolean isCancelled);
-    boolean existsByUserAndEvent(User user, Event event);
+    boolean existsByUserIdAndEventId(Long userId, Long eventId);
     @Query("SELECT t FROM Ticket t JOIN FETCH t.event WHERE t.user.id = :userId")
     List<Ticket> findByUserIdWithEvent(@Param("userId") Long userId);
+    @Query("SELECT t FROM Ticket t JOIN FETCH t.event JOIN FETCH t.user WHERE t.id = :id")
+    Optional<Ticket> findByIdWithEventAndUser(@Param("id") Long id);
 }
