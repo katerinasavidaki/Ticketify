@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
@@ -15,7 +16,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByEventStatus(EventStatus status);
     List<Event> findByTitleContainingIgnoreCase(String title);
     List<Event> findByRegionIdAndStatus(Long regionId, EventStatus status);
-    List<Event> findByDateAfter(LocalDate date);
+    List<Event> findByDateTimeAfter(LocalDateTime dateTime);
     @Query("SELECT e FROM Event e WHERE e.availableTickets > 0")
     List<Event> findAvailableEvents();
     @Query("SELECT e.availableTickets FROM Event e WHERE e.id = :eventId")

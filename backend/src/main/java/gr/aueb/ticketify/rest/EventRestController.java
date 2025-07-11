@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -89,9 +90,9 @@ public class EventRestController {
 
     @GetMapping("/upcoming")
     public ResponseEntity<List<EventReadOnlyDTO>> getUpcomingEvents(
-            @RequestParam(required = false) LocalDate fromDate) {
+            @RequestParam(required = false) LocalDateTime fromDate) {
 
-        LocalDate date = fromDate != null ? fromDate : LocalDate.now();
+        LocalDateTime date = fromDate != null ? fromDate : LocalDateTime.now();
         return ResponseEntity.ok(eventService.getUpcomingEvents(date));
     }
 

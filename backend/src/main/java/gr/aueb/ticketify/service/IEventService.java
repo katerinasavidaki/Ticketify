@@ -6,6 +6,7 @@ import gr.aueb.ticketify.dto.EventReadOnlyDTO;
 import gr.aueb.ticketify.dto.EventUpdateDTO;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IEventService {
@@ -20,7 +21,7 @@ public interface IEventService {
     List<EventReadOnlyDTO> getEventsByRegionId(Long regionId);
     List<EventReadOnlyDTO> getEventsByStatus(EventStatus status);
     List<EventReadOnlyDTO> getEventsByTitle(String title);
-    List<EventReadOnlyDTO> getUpcomingEvents(LocalDate fromDate);
+    List<EventReadOnlyDTO> getUpcomingEvents(LocalDateTime fromDate);
     List<EventReadOnlyDTO> getAvailableEvents();
     List<EventReadOnlyDTO> getEventsByRegionAndStatus(Long regionId, EventStatus status);
 }

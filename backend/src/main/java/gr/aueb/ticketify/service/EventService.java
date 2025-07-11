@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -130,8 +131,8 @@ public class EventService implements IEventService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EventReadOnlyDTO> getUpcomingEvents(LocalDate fromDate) {
-        return eventRepository.findByDateAfter(fromDate).stream()
+    public List<EventReadOnlyDTO> getUpcomingEvents(LocalDateTime fromDate) {
+        return eventRepository.findByDateTimeAfter(fromDate).stream()
                 .map(Mapper::mapToEventReadOnlyDTO)
                 .collect(Collectors.toList());
     }
