@@ -68,6 +68,7 @@ public class UserService implements IUserService {
                 .orElseThrow(() -> new EntityNotFoundException("User ", "User with id " + id +
                         " not found"));
 
+        user.setIsActive(false);
         userRepository.delete(user);
     }
 }

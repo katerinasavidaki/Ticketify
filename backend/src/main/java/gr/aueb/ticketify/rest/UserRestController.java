@@ -8,12 +8,14 @@ import gr.aueb.ticketify.service.IUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -73,18 +75,27 @@ public class UserRestController {
     }
 
     @Operation(
-            summary = "Get all tickets of a user",
-            description = "Returns a list of tickets that belong to a specific user. Requires USER or ADMIN role."
+            summary = "Get any user's tickets (admin only)",
+            description = "Returns all tickets for a specific user. Requires admin privileges.",
+            security = @SecurityRequirement(name = "Bearer Authentication\"")
     )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Tickets retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "User not found"),
-            @ApiResponse(responseCode = "403", description = "Forbidden")
-    })
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}/tickets")
     public ResponseEntity<List<TicketReadOnlyDTO>> getUserTickets(@PathVariable Long id) {
+
         List<TicketReadOnlyDTO> tickets = ticketService.getTicketsByUserId(id);
+        return ResponseEntity.ok(tickets);
+    }
+
+    @Operation(
+            summary = "Get authenticated user's tickets",
+            description = "Returns the tickets of the currently authenticated user.",
+            security = @SecurityRequirement(name = "Bearer Authentication")
+    )
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/my-tickets")
+    public ResponseEntity<List<TicketReadOnlyDTO>> getMyTickets(Principal principal) {
+        List<TicketReadOnlyDTO> tickets = ticketService.getTicketsByUser(principal);
         return ResponseEntity.ok(tickets);
     }
 
