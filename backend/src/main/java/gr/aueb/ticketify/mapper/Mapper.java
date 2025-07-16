@@ -29,6 +29,8 @@ public class Mapper {
 
     public static User mapUserCreateToModel(UserRegisterDTO registerDTO) {
         return User.builder()
+                .firstname(registerDTO.getFirstname())
+                .lastname(registerDTO.getLastname())
                 .username(registerDTO.getUsername())
                 .password(registerDTO.getPassword()) // Note: Password should be hashed before saving in service layer
                 .role(Role.USER)
@@ -38,9 +40,15 @@ public class Mapper {
     }
 
     public static User mapUserUpdateToModel(UserUpdateDTO userUpdateDTO, User existingUser) {
-        if (userUpdateDTO.getFirstname() != null) existingUser.setFirstname(userUpdateDTO.getFirstname());
-        if (userUpdateDTO.getLastname() != null) existingUser.setLastname(userUpdateDTO.getLastname());
-        if (userUpdateDTO.getPhone() != null) existingUser.setPhone(userUpdateDTO.getPhone());
+        if (userUpdateDTO.getFirstname() != null && !userUpdateDTO.getFirstname().isBlank()) {
+            existingUser.setFirstname(userUpdateDTO.getFirstname());
+        }
+        if (userUpdateDTO.getLastname() != null && !userUpdateDTO.getLastname().isBlank()) {
+            existingUser.setLastname(userUpdateDTO.getLastname());
+        }
+        if (userUpdateDTO.getPhone() != null && !userUpdateDTO.getPhone().isBlank()) {
+            existingUser.setPhone(userUpdateDTO.getPhone());
+        }
 
         return existingUser;
     }

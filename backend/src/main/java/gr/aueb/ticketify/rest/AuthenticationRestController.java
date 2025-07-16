@@ -1,6 +1,7 @@
 package gr.aueb.ticketify.rest;
 
 import gr.aueb.ticketify.authentication.AuthenticationService;
+import gr.aueb.ticketify.core.exceptions.ValidationException;
 import gr.aueb.ticketify.dto.UserRegisterDTO;
 import gr.aueb.ticketify.dto.authentication.AuthenticationRequestDTO;
 import gr.aueb.ticketify.dto.authentication.AuthenticationResponseDTO;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +35,12 @@ public class AuthenticationRestController {
             @ApiResponse(responseCode = "409", description = "User already exists")
     })
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponseDTO> register(@RequestBody @Valid UserRegisterDTO dto) {
+    public ResponseEntity<AuthenticationResponseDTO> register(@RequestBody @Valid UserRegisterDTO dto,
+                                                              BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(authenticationService.register(dto));
     }
@@ -47,7 +54,12 @@ public class AuthenticationRestController {
             @ApiResponse(responseCode = "401", description = "Invalid credentials")
     })
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponseDTO> login(@RequestBody @Valid AuthenticationRequestDTO dto) {
+    public ResponseEntity<AuthenticationResponseDTO> login(@RequestBody @Valid AuthenticationRequestDTO dto,
+                                                           BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
+
         return ResponseEntity.ok(authenticationService.authenticate(dto));
     }
 }

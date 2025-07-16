@@ -1,5 +1,6 @@
 package gr.aueb.ticketify.service;
 
+import gr.aueb.ticketify.core.exceptions.EntityNotAuthorizedException;
 import gr.aueb.ticketify.core.exceptions.EntityNotFoundException;
 import gr.aueb.ticketify.dto.UserReadOnlyDTO;
 import gr.aueb.ticketify.dto.UserUpdateDTO;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,12 +26,19 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserReadOnlyDTO getUserById(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User ", "User with id " + id +
-                        " not found"));
+    public UserReadOnlyDTO getUserById(Long id, Principal principal) {
 
-        return Mapper.mapToUserReadOnlyDTO(user);
+        User requester = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new EntityNotAuthorizedException("User ", "User not authenticated"));
+
+        if (!requester.getRole().name().equals("ADMIN") && !requester.getId().equals(id)) {
+            throw new EntityNotAuthorizedException("User ", "Access denied. You can only view your own profile.");
+        }
+
+        User targetUser = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with id " + id + " not found"));
+
+        return Mapper.mapToUserReadOnlyDTO(targetUser);
     }
 
     @Override
@@ -56,8 +65,9 @@ public class UserService implements IUserService {
         }
 
         User updatedUser = Mapper.mapUserUpdateToModel(updateDTO, existingUser);
-
-        return Mapper.mapToUserReadOnlyDTO(userRepository.save(updatedUser));
+        User savedUser = userRepository.save(updatedUser);
+        System.out.println("Lastname after update: " + updatedUser.getLastname());
+        return Mapper.mapToUserReadOnlyDTO(savedUser);
     }
 
     @Override

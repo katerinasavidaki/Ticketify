@@ -20,10 +20,13 @@ public class Region {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true)
     private String name;
 
     @OneToMany(mappedBy = "region", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
+    @Builder.Default
     @Getter(AccessLevel.PRIVATE)
     private Set<Event> events = new HashSet<>();
 

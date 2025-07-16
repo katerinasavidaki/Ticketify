@@ -1,4 +1,4 @@
-package gr.aueb.ticketify.ticketify;
+package gr.aueb.ticketify;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

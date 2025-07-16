@@ -1,10 +1,7 @@
 package gr.aueb.ticketify.authentication;
 
 import gr.aueb.ticketify.core.enums.Role;
-import gr.aueb.ticketify.core.exceptions.EntityAlreadyExistsException;
-import gr.aueb.ticketify.core.exceptions.EntityInvalidArgumentException;
-import gr.aueb.ticketify.core.exceptions.EntityNotAuthorizedException;
-import gr.aueb.ticketify.core.exceptions.EntityNotFoundException;
+import gr.aueb.ticketify.core.exceptions.*;
 import gr.aueb.ticketify.dto.UserRegisterDTO;
 import gr.aueb.ticketify.dto.authentication.AuthenticationRequestDTO;
 import gr.aueb.ticketify.dto.authentication.AuthenticationResponseDTO;
@@ -15,13 +12,16 @@ import gr.aueb.ticketify.repository.RegionRepository;
 import gr.aueb.ticketify.repository.UserRepository;
 import gr.aueb.ticketify.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -34,19 +34,33 @@ public class AuthenticationService {
 
     public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO dto) {
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(dto.password(), dto.username()));
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(dto.username(), dto.password()));
 
-        User user = userRepository.findByUsername(authentication.getName())
-                .orElseThrow(() -> new EntityNotAuthorizedException("User ", "User not authorized"));
+            User user = userRepository.findByUsername(authentication.getName())
+                    .orElseThrow(() -> new EntityNotAuthorizedException("User ", "User not authorized"));
 
-        String token = jwtService.generateToken(authentication.getName(), user.getRole().name());
+            String token = jwtService.generateToken(authentication.getName(), user.getRole().name());
 
-        return new AuthenticationResponseDTO(user.getUsername(), token, user.getRole());
+            log.info("User {} successfully authenticated", user.getUsername());
+
+            return new AuthenticationResponseDTO(user.getUsername(), token, user.getRole());
+        } catch (BadCredentialsException e) {
+            log.warn("Invalid credentials for username: {}", dto.username());
+            throw new EntityNotAuthorizedException("Authentication", "Invalid username or password");
+        } catch (Exception e) {
+            log.error("Authentication failed for username: {}", dto.username(), e);
+            throw new AppServerException("Authentication", "An error occurred during authentication");
+        }
     }
 
     @Transactional
     public AuthenticationResponseDTO register(UserRegisterDTO dto) {
+
+        Region region = regionRepository.findById(dto.getRegionId())
+                .orElseThrow(() -> new EntityNotFoundException("Region ", "Region with id " +
+                        dto.getRegionId() + " not found"));
 
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new EntityInvalidArgumentException("User ", "Passwords do not match");
@@ -55,10 +69,6 @@ public class AuthenticationService {
         if (userRepository.existsByUsername(dto.getUsername())) {
             throw new EntityAlreadyExistsException("User ", "Username already exists");
         }
-
-        Region region = regionRepository.findById(dto.getRegionId())
-                .orElseThrow(() -> new EntityNotFoundException("Region ", "Region with id " +
-                        dto.getRegionId() + " not found"));
 
         User user = Mapper.mapUserCreateToModel(dto);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));

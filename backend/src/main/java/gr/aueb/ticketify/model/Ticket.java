@@ -36,8 +36,10 @@ public class Ticket extends AbstractEntity {
     private Event event;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private TicketStatus status = TicketStatus.BOOKED;
 
     @Column(nullable = false, name = "is_cancelled")
+    @Builder.Default
     private Boolean isCancelled = false;
 }

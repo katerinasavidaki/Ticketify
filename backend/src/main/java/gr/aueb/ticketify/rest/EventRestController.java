@@ -1,6 +1,7 @@
 package gr.aueb.ticketify.rest;
 
 import gr.aueb.ticketify.core.enums.EventStatus;
+import gr.aueb.ticketify.core.exceptions.ValidationException;
 import gr.aueb.ticketify.dto.EventCreateDTO;
 import gr.aueb.ticketify.dto.EventReadOnlyDTO;
 import gr.aueb.ticketify.dto.EventUpdateDTO;
@@ -10,9 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -37,14 +37,24 @@ public class EventRestController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<EventReadOnlyDTO> createEvent(@Valid @RequestBody EventCreateDTO dto) {
+    public ResponseEntity<EventReadOnlyDTO> createEvent(@Valid @RequestBody EventCreateDTO dto,
+                                                        BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
+
         EventReadOnlyDTO createdEvent = eventService.createEvent(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdEvent);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<EventReadOnlyDTO> updateEvent(@PathVariable Long id, @Valid @RequestBody EventUpdateDTO dto) {
+    public ResponseEntity<EventReadOnlyDTO> updateEvent(@PathVariable Long id, @Valid @RequestBody EventUpdateDTO dto,
+                                                        BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
+
         EventReadOnlyDTO updatedEvent = eventService.updateEvent(id, dto);
         return ResponseEntity.ok(updatedEvent);
     }

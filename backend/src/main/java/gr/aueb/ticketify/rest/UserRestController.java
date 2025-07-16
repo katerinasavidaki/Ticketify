@@ -1,5 +1,6 @@
 package gr.aueb.ticketify.rest;
 
+import gr.aueb.ticketify.core.exceptions.ValidationException;
 import gr.aueb.ticketify.dto.TicketReadOnlyDTO;
 import gr.aueb.ticketify.dto.UserReadOnlyDTO;
 import gr.aueb.ticketify.dto.UserUpdateDTO;
@@ -13,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -37,8 +39,8 @@ public class UserRestController {
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/{id}")
-    public ResponseEntity<UserReadOnlyDTO> getUserById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public ResponseEntity<UserReadOnlyDTO> getUserById(@PathVariable Long id, Principal principal) {
+        return ResponseEntity.ok(userService.getUserById(id, principal));
     }
 
     @Operation(
@@ -69,7 +71,12 @@ public class UserRestController {
     @PutMapping("/{id}")
     public ResponseEntity<UserReadOnlyDTO> updateUser(
             @PathVariable Long id,
-            @RequestBody @Valid UserUpdateDTO updateDTO) {
+            @RequestBody @Valid UserUpdateDTO updateDTO,
+            BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
 
         return ResponseEntity.ok(userService.updateUser(id, updateDTO));
     }

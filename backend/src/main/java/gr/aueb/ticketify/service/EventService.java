@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -148,7 +147,7 @@ public class EventService implements IEventService {
     @Override
     @Transactional(readOnly = true)
     public List<EventReadOnlyDTO> getEventsByRegionAndStatus(Long regionId, EventStatus status) {
-        return eventRepository.findByRegionIdAndStatus(regionId, status).stream()
+        return eventRepository.findByRegionIdAndEventStatus(regionId, status).stream()
                 .map(Mapper::mapToEventReadOnlyDTO)
                 .collect(Collectors.toList());
     }

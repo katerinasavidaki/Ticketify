@@ -24,7 +24,10 @@ public class User extends AbstractEntity implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String firstname;
+
+    @Column(nullable = false)
     private String lastname;
 
     @Column(nullable = false, unique = true)
@@ -33,17 +36,19 @@ public class User extends AbstractEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false, unique = true)
     private String phone;
 
     @ColumnDefault("true")
     @Column(name = "is_active")
+    @Builder.Default
     private Boolean isActive = true;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "region_id", nullable = false)
     private Region region;
 
@@ -55,13 +60,6 @@ public class User extends AbstractEntity implements UserDetails {
 
     public Set<Ticket> getAllTickets() {
         return Collections.unmodifiableSet(tickets);
-    }
-
-    public String getFullName() {
-        if (firstname == null && lastname == null) return "";
-        if (firstname == null) return lastname;
-        if (lastname == null) return firstname;
-        return firstname + " " + lastname;
     }
 
     public void addTicket(Ticket ticket) {

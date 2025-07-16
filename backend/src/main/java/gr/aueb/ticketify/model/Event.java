@@ -38,17 +38,19 @@ public class Event extends AbstractEntity {
 
     private Integer availableTickets;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "region_id", nullable = false)
     private Region region;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "event_status", nullable = false)
+    @Builder.Default
     private EventStatus eventStatus = EventStatus.ACTIVE;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Getter(AccessLevel.PRIVATE)
+    @Builder.Default
     private Set<Ticket> tickets = new HashSet<>();
 
     public Set<Ticket> getAllTickets() {

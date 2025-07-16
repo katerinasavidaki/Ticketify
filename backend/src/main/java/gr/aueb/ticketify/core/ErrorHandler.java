@@ -4,6 +4,7 @@ import gr.aueb.ticketify.core.exceptions.*;
 import gr.aueb.ticketify.dto.ResponseMessageDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -29,28 +30,33 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ResponseMessageDTO> handleConstraintViolationException(EntityNotFoundException ex) {
+    public ResponseEntity<ResponseMessageDTO> handleEntityNotFound(EntityNotFoundException ex) {
         return new ResponseEntity<>(new ResponseMessageDTO(ex.getCode(), ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(EntityAlreadyExistsException.class)
-    public ResponseEntity<ResponseMessageDTO> handleConstraintViolationException(EntityAlreadyExistsException ex) {
+    public ResponseEntity<ResponseMessageDTO> handleEntityAlreadyExists(EntityAlreadyExistsException ex) {
         return new ResponseEntity<>(new ResponseMessageDTO(ex.getCode(), ex.getMessage()), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(EntityInvalidArgumentException.class)
-    public ResponseEntity<ResponseMessageDTO> handleConstraintViolationException(EntityInvalidArgumentException ex) {
+    public ResponseEntity<ResponseMessageDTO> handleEntityInvalidArgument(EntityInvalidArgumentException ex) {
         return new ResponseEntity<>(new ResponseMessageDTO(ex.getCode(), ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(EntityNotAuthorizedException.class)
-    public ResponseEntity<ResponseMessageDTO> handleConstraintViolationException(EntityNotAuthorizedException ex) {
+    public ResponseEntity<ResponseMessageDTO> handleEntityNotAuthorized(EntityNotAuthorizedException ex) {
         return new ResponseEntity<>(new ResponseMessageDTO(ex.getCode(), ex.getMessage()), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(AppServerException.class)
-    public ResponseEntity<ResponseMessageDTO> handleConstraintViolationException(AppServerException ex) {
+    public ResponseEntity<ResponseMessageDTO> handleAppServerException(AppServerException ex) {
         return new ResponseEntity<>(new ResponseMessageDTO(ex.getCode(), ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ResponseMessageDTO> handleAccessDeniedException(AccessDeniedException ex) {
+        return new ResponseEntity<>(new ResponseMessageDTO("AccessDenied", "User is not allowed to access this endpoint."), HttpStatus.FORBIDDEN);
     }
 
     /**
